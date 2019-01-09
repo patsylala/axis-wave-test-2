@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>threejs - geometry</title>
+
+    <style>
+      body{
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas"></canvas>
+    <script src="three.js"></script>
+    <script src="OrbitControls.js"></script>
+    <script src="https://cdn.rawgit.com/chandlerprall/ThreeCSG/master/ThreeCSG.js"></script>
+
+    <script>
+
+      var renderer,
+        scene,
+        camera,
+        controls,
+        whiteLineMat = new THREE.LineBasicMaterial({ color: 0xffffff }),
+        axisHelper = new THREE.AxisHelper(5),
+        lineGeometry = new THREE.Geometry(),
+        dashedLineMat = new THREE.LineDashedMaterial( {
+      	color: 0xffffff,
+      	linewidth: 1,
+      	scale: 1,
+      	dashSize: 3,
+      	gapSize: 1,
+        } ),
+        line = new THREE.Line( lineGeometry, dashedLineMat ),
+        circles = [],
+        pillar = new THREE.Group(),
+        geometryLength = 100,
+        myCanvas = document.getElementById('myCanvas');
+
+      //RENDERER
+      renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
+      renderer.setClearColor(0x000000);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      //CAMERA
+      camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 3000 );
+			camera.position.z = -100;
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+      controls.update();
+      controls.zoomSpeed = 5.0;
+
+      //SCENE
+      scene = new THREE.Scene();
+
+      //LIGHTS
+      var light = new THREE.AmbientLight(0xffffff, 0.5);
+      scene.add(light);
+
+      var light2 = new THREE.PointLight(0xffffff, 0.5);
+      scene.add(light2);
+
+      //GEOMETRY
+      // var geometry = new THREE.CylinderGeometry(50, 50, 100, 20, 20, true);
+      // var material = new THREE.MeshLambertMaterial({color: 0xF3FFE2});
+      // var mesh = new THREE.Mesh(geometry, material);
+      // mesh.position.z = -50;
+
+      //scene.add(mesh);
+
+      createGeometries();
+      //RENDER LOOP
+      render();
+
+      var delta = 0;
+      console.log(pillar.children.length);
+      function render() {
+      	// mesh.rotation.x += 0.01;
+      	// mesh.rotation.y += 0.01;
+        pillar.rotation.z += 0.001;
+      	pillar.rotation.y += 0.001;
+        line.rotation.z += 0.001;
+      	line.rotation.y += 0.001;
+
+          delta += 0.2;
+          // for (let i = 0; i < pillar.children.length; i++) {
+          //   pillar.children[i].scale.set(
+          //   Math.sin((i * 0.5) + delta ) ,
+          //   Math.cos((i * 0.2) + delta) , 1 );
+          // }
+          // pillar.children[0].scale.set( .5, .5, 1);
+          // pillar.scale.set(Math.sin(delta) * 1,Math.sin(delta) * 1,0);
+          // geometry.verticesNeedUpdate = true;
+
+          for (let i = 0; i < pillar.children.length; i++) {
+            pillar.children[i].scale.set(
+            -Math.sin((i * .08) + (delta * .09))  ,
+            -Math.sin((i * .08) + (delta * .09))  ,
+            1);
+          }
+
+
+      	renderer.render(scene, camera);
+      	requestAnimationFrame(render);
+      }
+
+      function createGeometries () {
+        for (let i = 0; i < geometryLength; i++) {
+          circles[i] = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CircleGeometry(7, 50)), whiteLineMat)
+          // pillar[i].rotation.z = i * (360 / geometryLength) * Math.PI / 180; //convert to radians
+          circles[i].position.z = (i * .5) - ((geometryLength / 2) / 2);
+          pillar.add(circles[i]);
+        }
+        lineGeometry.vertices.push(
+          new THREE.Vector3( 0, 0, -100 ),
+          new THREE.Vector3( 0, 0, 100 ));
+        lineGeometry.computeLineDistances();
+        scene.add(line);
+        scene.add(pillar);
+        //scene.add(axisHelper);
+      }
+
+    </script>
+  </body>
+</html>
